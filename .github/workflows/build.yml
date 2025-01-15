@@ -51,10 +51,10 @@ jobs:
         run: npm install
 
       - name: Build React Step
-        run: npm run watchreact
+        run: npm run buildreact
 
       - name: Build Electron Step
-        run: npm run watch
+        run: npm run compile
 
       - name: Electron-Builder
         run: |
