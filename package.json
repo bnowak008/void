@@ -74,7 +74,8 @@
     "extensions-ci": "node ./node_modules/gulp/bin/gulp.js extensions-ci",
     "extensions-ci-pr": "node ./node_modules/gulp/bin/gulp.js extensions-ci-pr",
     "perf": "node scripts/code-perf.js",
-    "update-build-ts-version": "npm install typescript@next && tsc -p ./build/tsconfig.build.json"
+    "update-build-ts-version": "npm install typescript@next && tsc -p ./build/tsconfig.build.json",
+    "pack": "electron-builder"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
@@ -182,6 +183,7 @@
     "debounce": "^1.0.0",
     "deemon": "^1.8.0",
     "electron": "30.5.1",
+    "electron-builder": "^25.1.8",
     "eslint": "8.36.0",
     "eslint-plugin-header": "3.1.1",
     "eslint-plugin-jsdoc": "^46.5.0",

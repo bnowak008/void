@@ -1,0 +1,76 @@
+name: Build and Release Binaries
+
+on:
+  push:
+    branches:
+      - main  # Trigger workflow on pushes to the main branch
+
+jobs:
+  build:
+    name: Build Binaries
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      # Checkout the code
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      # Install Dependencies
+      - name: Install Dependencies
+        run: npm install
+
+      # Build the application
+      - name: Build Application
+        run: npm run pack
+
+      # Upload build artifacts for later use (optional)
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: binaries-${{ matrix.os }}
+          path: dist/
+
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      # Download build artifacts from previous jobs
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: binaries-ubuntu-latest
+          path: dist/linux
+
+      - name: Download Build Artifacts (Windows)
+        uses: actions/download-artifact@v3
+        with:
+          name: binaries-windows-latest
+          path: dist/windows
+
+      - name: Download Build Artifacts (macOS)
+        uses: actions/download-artifact@v3
+        with:
+          name: binaries-macos-latest
+          path: dist/macos
+
+      # Publish release to GitHub
+      - name: Publish Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/linux/*.AppImage
+            dist/linux/*.deb
+            dist/windows/*.exe
+            dist/macos/*.dmg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
