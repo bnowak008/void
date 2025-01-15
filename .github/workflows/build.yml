@@ -1,76 +1,44 @@
-name: Build and Release Binaries
+name: Build Binaries for All Platforms
 
 on:
   push:
-    branches:
-      - main  # Trigger workflow on pushes to the main branch
+    branches: [ main ]
 
 jobs:
   build:
-    name: Build Binaries
+    name: Electron Build
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
-      # Checkout the code
-      - name: Checkout Code
+      - name: Check out code
         uses: actions/checkout@v3
 
-      # Set up Node.js
-      - name: Set up Node.js
+      - name: Use Node 16 (example)
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 16
 
-      # Install Dependencies
       - name: Install Dependencies
         run: npm install
+        # or yarn install if your project uses yarn
 
-      # Build the application
-      - name: Build Application
-        run: npm run pack
+      - name: Build React Step
+        run: npm run watchreact
 
-      # Upload build artifacts for later use (optional)
-      - name: Upload Build Artifacts
+      - name: Build Electron Step
+        run: npm run watch
+
+      - name: Electron-Builder
+        run: |
+          npx electron-builder --${{ matrix.os == 'windows-latest' && 'win' || matrix.os == 'macos-latest' && 'mac' || 'linux' }}
+        # or specify a config with "npx electron-builder -c electron-builder.config.js"
+
+      # Upload artifacts so you can download them from the Actions page
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: binaries-${{ matrix.os }}
+          name: ${{ matrix.os }}-build
           path: dist/
-
-  release:
-    name: Create Release
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      # Download build artifacts from previous jobs
-      - name: Download Build Artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: binaries-ubuntu-latest
-          path: dist/linux
-
-      - name: Download Build Artifacts (Windows)
-        uses: actions/download-artifact@v3
-        with:
-          name: binaries-windows-latest
-          path: dist/windows
-
-      - name: Download Build Artifacts (macOS)
-        uses: actions/download-artifact@v3
-        with:
-          name: binaries-macos-latest
-          path: dist/macos
-
-      # Publish release to GitHub
-      - name: Publish Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            dist/linux/*.AppImage
-            dist/linux/*.deb
-            dist/windows/*.exe
-            dist/macos/*.dmg
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # dist/ is the typical output directory for electron-builder

@@ -1,44 +1,36 @@
-name: Build Binaries on Sync
+name: Sync from Upstream
 
 on:
-  push:
-    branches:
-      - main  # Triggers when your fork's main is updated
+  schedule:
+    - cron: "0 * * * *"  # once every hour
+  workflow_dispatch:
 
 jobs:
-  build:
-    name: Build Binaries
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-
+  sync:
+    runs-on: ubuntu-latest
     steps:
-      # Checkout the code
-      - name: Checkout Code
+      - name: Check out code
         uses: actions/checkout@v3
-
-      # Set up Node.js
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
         with:
-          node-version: 18
+          fetch-depth: 0
 
-      # Install dependencies
-      - name: Install Dependencies
-        run: npm install
-
-      # Build the application
-      - name: Build Application
-        run: npm run pack
-
-      # Upload the binaries to the build branch
-      - name: Push Built Binaries
+      - name: Configure Git
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git checkout build
-          cp -r dist/* .
-          git add .
-          git commit -m "Update built binaries"
-          git push origin build
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/voideditor/void.git
+          git fetch upstream
+
+      - name: Merge upstream into main
+        run: |
+          git checkout main
+          git merge upstream/main
+
+      - name: Push changes to fork
+        run: |
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
