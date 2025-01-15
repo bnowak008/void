@@ -15,14 +15,19 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
 
-      - name: Use Node 16 (example)
+      - name: Use Node 18
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
 
       - name: Install Dependencies
         run: npm install
         # or yarn install if your project uses yarn
+
+      - name: Install Python Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-distutils
 
       - name: Build React Step
         run: npm run watchreact
