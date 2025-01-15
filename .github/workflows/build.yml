@@ -15,19 +15,44 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
 
-      - name: Use Node 18
+      - name: Use Node 20
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
+
+      # Platform-Specific Dependencies
+      - name: Set Up Platform Dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-distutils fakeroot dpkg rpm libnss3 libxss1 libxkbfile1
+          # Add any additional packages required for AppImage builds
+
+      - name: Set Up Platform Dependencies (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew update
+          brew install python3
+          brew install fakeroot dpkg
+
+      - name: Set Up Platform Dependencies (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          # Ensure Chocolatey is installed
+          if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
+            Set-ExecutionPolicy Bypass -Scope Process -Force;
+            [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072;
+            iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'));
+          }
+          choco --version
+
+          # Install dependencies
+          choco install python --version=3.9
+          choco install nsis
+          choco install 7zip
 
       - name: Install Dependencies
         run: npm install
-        # or yarn install if your project uses yarn
-
-      - name: Install Python Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-distutils
 
       - name: Build React Step
         run: npm run watchreact
@@ -38,12 +63,14 @@ jobs:
       - name: Electron-Builder
         run: |
           npx electron-builder --${{ matrix.os == 'windows-latest' && 'win' || matrix.os == 'macos-latest' && 'mac' || 'linux' }}
-        # or specify a config with "npx electron-builder -c electron-builder.config.js"
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false" # Disable automatic macOS signing if not required
+          APPLE_ID: ${{ secrets.APPLE_ID }} # For macOS notarization
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }} # App-specific password for Apple ID
+          CSC_LINK: ${{ secrets.CSC_LINK }} # Link to the macOS certificate file (e.g., .p12)
 
-      # Upload artifacts so you can download them from the Actions page
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.os }}-build
-          path: dist/
-          # dist/ is the typical output directory for electron-builder
+          path: dist/ # Ensure this matches your electron-builder output directory
