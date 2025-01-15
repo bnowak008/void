@@ -25,7 +25,10 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3 python3-pip fakeroot dpkg rpm libnss3 libxss1 libxkbfile1
+          sudo apt-get install -y \
+            python3 python3-pip python3-distutils python3-venv \
+            fakeroot dpkg rpm libnss3 libxss1 libxkbfile1 \
+            libkrb5-dev g++ make
           python3 -m pip install --upgrade pip setuptools
 
       - name: Set Up Platform Dependencies (Windows)
@@ -57,10 +60,7 @@ jobs:
         run: |
           npx electron-builder --${{ matrix.os == 'windows-latest' && 'win' || 'linux' }}
         env:
-          CSC_IDENTITY_AUTO_DISCOVERY: "false" # Disable automatic macOS signing if not required
-          APPLE_ID: ${{ secrets.APPLE_ID }} # For macOS notarization
-          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }} # App-specific password for Apple ID
-          CSC_LINK: ${{ secrets.CSC_LINK }} # Link to the macOS certificate file (e.g., .p12)
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
