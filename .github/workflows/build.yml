@@ -27,14 +27,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y python3 python3-pip fakeroot dpkg rpm libnss3 libxss1 libxkbfile1
           python3 -m pip install --upgrade pip setuptools
-          # Add any additional packages required for AppImage builds
 
       - name: Set Up Platform Dependencies (macOS)
         if: matrix.os == 'macos-latest'
         run: |
           brew update
-          brew install python3
-          brew install fakeroot dpkg
+          brew install python@3.11
+          echo 'export PATH="/opt/homebrew/opt/python@3.11/bin:$PATH"' >> $GITHUB_ENV
+          python3 -m ensurepip --upgrade
+          python3 -m pip install --upgrade pip setuptools wheel
 
       - name: Set Up Platform Dependencies (Windows)
         if: matrix.os == 'windows-latest'
