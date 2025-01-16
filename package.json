@@ -273,11 +273,12 @@
   },
   "build": {
     "appId": "com.bnowak008.voideditor.code",
-    "productName": "Void Binaries",
+    "productName": "Void Test Binaries",
     "files": [
       "out/**/*",
       "node_modules/**/*",
-      "package.json"
+      "package.json",
+      "product.json"
     ],
     "directories": {
       "output": "dist"
@@ -287,11 +288,15 @@
         "from": "resources/",
         "to": "resources/",
         "filter": ["**/*"]
+      },
+      {
+        "from": "out/nls.messages.json",
+        "to": "out/nls.messages.json"
       }
     ],
     "extraMetadata": {
       "main": "out/main.js",
-      "type": "commonjs"
+      "type": "module"
     },
     "asar": true,
     "asarUnpack": [
@@ -301,15 +306,18 @@
     "extends": null,
     "win": {
       "target": "nsis",
-      "icon": "build/icon.ico"
+      "icon": "dist/icon.ico"
     },
     "linux": {
-      "target": ["AppImage", "deb"],
-      "icon": "build/icons",
+      "target": ["AppImage"],
+      "icon": "dist/icons",
       "category": "Development",
-      "executableName": "void-beta-editor",
-      "synopsis": "Void Beta Binaries",
-      "description": "Void Beta Binaries - A Modern Code Editor"
+      "executableName": "void-editor",
+      "synopsis": "Void Editor",
+      "description": "Void Editor - A Modern Code Editor",
+      "asarUnpack": [
+        "out/nls.messages.json"
+      ]
     }
   }
 }
