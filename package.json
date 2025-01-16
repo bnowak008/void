@@ -75,7 +75,8 @@
     "extensions-ci-pr": "node ./node_modules/gulp/bin/gulp.js extensions-ci-pr",
     "perf": "node scripts/code-perf.js",
     "update-build-ts-version": "npm install typescript@next && tsc -p ./build/tsconfig.build.json",
-    "pack": "electron-builder"
+    "pack": "npm run buildreact && npm run compile && electron-builder",
+    "pack:linux": "npm run pack --linux"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
@@ -272,14 +273,14 @@
   },
   "build": {
     "appId": "com.bnowak008.voideditor.code",
-    "productName": "Void Binaries Fork",
+    "productName": "Void Binaries",
     "files": [
-      "dist/**/*",
+      "out/**/*",
       "node_modules/**/*",
       "package.json"
     ],
     "directories": {
-      "output": "build"
+      "output": "dist"
     },
     "extraResources": [
       {
@@ -288,17 +289,27 @@
         "filter": ["**/*"]
       }
     ],
+    "extraMetadata": {
+      "main": "out/main.js",
+      "type": "commonjs"
+    },
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/**/*.node",
+      "node_modules/node-pty/**/*"
+    ],
+    "extends": null,
     "win": {
       "target": "nsis",
       "icon": "build/icon.ico"
     },
-    "mac": {
-      "target": ["dmg", "zip"],
-      "icon": "build/icon.icns"
-    },
     "linux": {
-      "target": ["AppImage", "deb", "rpm"],
-      "icon": "build/icons"
+      "target": ["AppImage", "deb"],
+      "icon": "build/icons",
+      "category": "Development",
+      "executableName": "void-beta-editor",
+      "synopsis": "Void Beta Binaries",
+      "description": "Void Beta Binaries - A Modern Code Editor"
     }
   }
 }
