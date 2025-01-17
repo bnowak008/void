@@ -598,15 +598,3 @@ class CodeMain {
 // Main Startup
 const code = new CodeMain();
 code.main();
-
-// Near the top with other imports
-import { app } from 'electron';
-
-// Add before app.whenReady()
-if (process.platform === 'linux') {
-	// Enable Wayland support
-	app.commandLine.appendSwitch('enable-features', 'WaylandWindowDecorations');
-	if (process.env.XDG_SESSION_TYPE === 'wayland') {
-		app.commandLine.appendSwitch('ozone-platform', 'wayland');
-	}
-}

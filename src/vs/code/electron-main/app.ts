@@ -158,7 +158,6 @@ export class CodeApplication extends Disposable {
 
 		this.configureSession();
 		this.registerListeners();
-		this.updateService.setEnablement(false);
 	}
 
 	private configureSession(): void {
